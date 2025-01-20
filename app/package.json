@@ -1,0 +1,37 @@
+{
+  "name": "mr-token",
+  "type": "module",
+  "version": "0.1.0",
+  "bin": {
+    "mr-token": "bin/run-mr-token.ts"
+  },
+  "scripts": {
+    "dev": "bun --watch bin/run-mr-token.ts",
+    "start": "bun bin/run-mr-token.ts",
+    "format": "bun prettier . --write",
+    "test": "bun vitest",
+    "migrate:up": "bun run scripts/migrate_up.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/commander": "^2.12.5",
+    "eslint": "^9.18.0",
+    "prettier": "3.4.2",
+    "typescript-eslint": "^8.21.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.0.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@clickhouse/client": "^1.10.1",
+    "bybit-api": "^3.10.29",
+    "clickhouse-migrations": "^1.0.2",
+    "commander": "^13.0.0",
+    "dotenv": "^16.4.7",
+    "eslint-config-prettier": "^10.0.1",
+    "moment": "^2.30.1",
+    "nock": "^13.5.6"
+  }
+}
