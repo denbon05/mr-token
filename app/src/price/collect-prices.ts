@@ -1,4 +1,5 @@
 import moment from "moment";
+import debug from "debug";
 import { bybitClient, clickhouseClient } from "~src/clients";
 import * as constants from "~src/constants";
 import { Tables } from "~src/types/Clickhouse";
@@ -14,9 +15,7 @@ import type {
   StorePriceParam,
 } from "~src/types/prices/StorePrices";
 
-// TODO: compute it in the function
-
-// const MAX_HOURS_RANGE = 16;
+const log = debug("mr-token:price:collect");
 
 export const computeMissedRanges = ({
   interval,
@@ -30,7 +29,7 @@ export const computeMissedRanges = ({
       {
         start: endTime
           .clone()
-          .subtract(constants.EXCHANGE_MAX_LIST_LENGTH * interval, "minutes")
+          .subtract(constants.BYBIT_MAX_LIST_LENGTH * interval, "minutes")
           .valueOf(),
         end: endTime.valueOf(),
       },
@@ -42,31 +41,33 @@ export const computeMissedRanges = ({
   const isUpToDate = endTime.subtract(interval, "minutes").isBefore(startTime);
 
   if (isUpToDate) {
-    // We are good for now, there are no missed ranges
+    log("We are good for now, there are no missed ranges");
     return missedRanges;
   }
 
   // Due to exchange API limitation request/sec
   // ranges collected as separate tuples
-  let currentStartTime = startTime;
+  let rangeStartTime = moment(startTime);
 
   // Collect ranges
-  while (moment(currentStartTime).isBefore(endTime)) {
-    const minutesToAdd = constants.EXCHANGE_MAX_LIST_LENGTH * interval;
-    const currentEndTime = moment(currentStartTime)
+  while (rangeStartTime.isBefore(endTime)) {
+    const minutesToAdd = constants.BYBIT_MAX_LIST_LENGTH * interval;
+    let rangeEndTime = moment(rangeStartTime)
       .clone()
-      .add(minutesToAdd, "minutes")
-      .valueOf();
+      .add(minutesToAdd, "minutes");
+
+    if (rangeEndTime.isAfter(endTime)) {
+      // end of range can't be later than current time
+      rangeEndTime = endTime;
+    }
 
     missedRanges.push({
-      start: currentStartTime,
-      end: currentEndTime,
+      start: rangeStartTime.valueOf(),
+      end: rangeEndTime.valueOf(),
     });
 
     // Increase start time
-    currentStartTime = moment(currentStartTime)
-      .add(minutesToAdd, "minutes")
-      .valueOf();
+    rangeStartTime = rangeStartTime.add(minutesToAdd, "minutes");
   }
 
   return missedRanges;
@@ -87,7 +88,7 @@ const getMissedDataRanges = async ({
   });
 
   const data = await res.json<Record<string, any>>();
-  console.log("last known data from DB", data);
+  log("last known data from DB %O", data);
   const {
     data: [item],
   } = data;
@@ -106,7 +107,7 @@ const getMissedDataRanges = async ({
 const fetchPrices = async (opts: FetchPricesParam) => {
   const bybitResponse = await bybitClient.getMarkPriceKline(opts);
 
-  console.log("ByBit response", bybitResponse);
+  log("ByBit result %O", bybitResponse.result);
 
   return bybitResponse.result;
 };
@@ -117,10 +118,12 @@ const storePrices = async (data: StorePriceParam, opts: StorePriceOpts) => {
     ([startTime, openPrice, highPrice, lowPrice, closePrice]) => ({
       symbol: data.symbol,
       close_price: parseFloat(closePrice),
-      timestamp: moment(Number(startTime)).add(opts.interval, "minutes").unix(),
+      timestamp: moment(parseInt(startTime))
+        .add(opts.interval, "minutes")
+        .unix(),
     })
   );
-  console.log("preapared db datga:", preparedPrices.slice(0, 5));
+  log("prepared db data sample %O", preparedPrices.slice(0, 5));
   await clickhouseClient.insert({
     table: Tables.TokenPrices,
     values: preparedPrices,
@@ -149,7 +152,6 @@ export const collectPrices = async ({
       category,
       ...range,
     });
-    // TODO: make a pause between requests according to the rate limit
     await storePrices(bybitResult, {
       interval,
     });

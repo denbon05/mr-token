@@ -3,7 +3,7 @@ import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
 import globals from "globals";
 
-export default [
+export default tseslint.config([
   {
     files: ["**/*.{js,mjs,cjs,ts}"],
     languageOptions: {
@@ -18,5 +18,9 @@ export default [
   eslintConfigPrettier,
   {
     ignores: ["node_modules", "dist"],
+    rules: {
+      "@typescript-eslint/ban-ts-comment": "off",
+      "no-console": "warn",
+    }
   },
-];
+]);

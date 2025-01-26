@@ -26,12 +26,16 @@
   },
   "dependencies": {
     "@clickhouse/client": "^1.10.1",
+    "@types/debug": "^4.1.12",
     "bybit-api": "^3.10.29",
     "clickhouse-migrations": "^1.0.2",
     "commander": "^13.0.0",
+    "debug": "^4.4.0",
+    "dot": "^1.1.3",
     "dotenv": "^16.4.7",
     "eslint-config-prettier": "^10.0.1",
     "moment": "^2.30.1",
-    "nock": "^13.5.6"
+    "nock": "^13.5.6",
+    "p-queue": "^8.1.0"
   }
 }
