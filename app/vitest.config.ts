@@ -6,6 +6,7 @@ export default defineConfig({
   test: {
     watch: false,
     include: ["__tests__/**/*.{test,spec}.ts"],
+    exclude: ["__tests__/helpers/**"],
     environment: "node",
   },
 });

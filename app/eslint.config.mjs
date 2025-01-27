@@ -21,6 +21,6 @@ export default tseslint.config([
     rules: {
       "@typescript-eslint/ban-ts-comment": "off",
       "no-console": "warn",
-    }
+    },
   },
 ]);

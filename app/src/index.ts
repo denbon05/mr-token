@@ -1,12 +1,9 @@
-import { collectPrices } from "~src/price";
-
-// TODO: get data as an input
-
-const PAIR_SYMBOL = "BTCUSDT";
+import moment from "moment";
+import { watchZScore as watchPriceZScore } from "./price";
 
 /** Only interval in minutes is accepted */
 export default async () => {
-  await collectPrices({
-    symbol: PAIR_SYMBOL,
+  await watchPriceZScore({
+    startingPoint: moment().subtract(14, "days").valueOf(),
   });
 };

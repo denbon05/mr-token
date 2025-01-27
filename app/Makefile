@@ -1,8 +1,8 @@
 dev:
-	bun run dev
+	DEBUG=mr-token:* bun run dev
 
 start:
-	DEBUG=mr-token:* bun run start
+	bun run start
 
 format:
 	bun run format

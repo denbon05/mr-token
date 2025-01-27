@@ -87,6 +87,7 @@ const getMissedDataRanges = async ({
     format: "JSON",
   });
 
+  // TODO: types for DB requests
   const data = await res.json<Record<string, any>>();
   log("last known data from DB %O", data);
   const {
@@ -131,10 +132,10 @@ const storePrices = async (data: StorePriceParam, opts: StorePriceOpts) => {
   });
 };
 
-/** Collects prices per specified interval during requested time diapason */
+/** Collects prices per specified interval during requested time range */
 export const collectPrices = async ({
   symbol,
-  interval = constants.BASE_INTERVAL,
+  interval,
   category = "linear",
 }: CollectPricesParam) => {
   // Compute ranges and collect them separately

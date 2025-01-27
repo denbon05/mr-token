@@ -1,6 +1,7 @@
 # mr-token
 
 **Prerequisites:**
+
 - bun
 - `.env` file
 
